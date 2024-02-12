@@ -626,7 +626,7 @@ export async function createHotReloaderTurbopack(
       isApp,
       url: requestUrl,
     }) {
-      if (inputPage !== '/_error' && BLOCKED_PAGES.indexOf(inputPage) !== -1) {
+      if (BLOCKED_PAGES.includes(inputPage) && inputPage !== '/_error') {
         return
       }
 
@@ -666,16 +666,15 @@ export async function createHotReloaderTurbopack(
       }
 
       await currentEntriesHandling
-      const route = definition?.pathname
-        ? currentEntrypoints.page.get(definition!.pathname)
-        : isApp
+
+      const isInsideAppDir = routeDef.bundlePath.startsWith('app/')
+
+      const route = isInsideAppDir
         ? currentEntrypoints.app.get(page)
         : currentEntrypoints.page.get(page)
 
       if (!route) {
         // TODO: why is this entry missing in turbopack?
-        if (page === '/_app') return
-        if (page === '/_document') return
         if (page === '/middleware') return
         if (page === '/src/middleware') return
         if (page === '/instrumentation') return
