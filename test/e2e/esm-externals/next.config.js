@@ -13,7 +13,6 @@ module.exports = {
     ],
   },
   webpack(config, { isServer }) {
-    config.experiments.toplevelAwait = true
     config.resolve.alias = {
       ...config.resolve.alias,
       'preact/compat': 'react',

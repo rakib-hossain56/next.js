@@ -68,12 +68,24 @@ export async function resolveExternal(
   let res: string | null = null
   let isEsm: boolean = false
 
+  if (request.includes('dual-pkg-optout')) {
+    console.log(
+      request,
+      'esmExternalsConfig',
+      esmExternalsConfig,
+      'esmExternals',
+      esmExternals,
+      'isEsmRequested',
+      isEsmRequested
+    )
+  }
+
   const preferEsmOptions =
-    esmExternals && isEsmRequested // &&
+    esmExternals && isEsmRequested
       ? // For package that marked as externals that should be not bundled,
         // we don't resolve them as ESM since it could be resolved as async module,
         // such as `import(external package)` in the bundle, valued as a `Promise`.
-        // !optOutBundlingPackages.some((optOut) => request.startsWith(optOut))
+        // && !optOutBundlingPackages.some((optOut) => request.startsWith(optOut))
         [true, false]
       : [false]
 
@@ -267,23 +279,6 @@ export function makeExternalHandler({
       return resolveNextExternal(request)
     }
 
-    // Early return if the request needs to be bundled, such as in the client layer.
-    // Treat react packages and next internals as external for SSR layer,
-    // also map react to builtin ones with require-hook.
-    // Otherwise keep continue the process to resolve the externals.
-    if (layer === WEBPACK_LAYERS.serverSideRendering) {
-      const isRelative = request.startsWith('.')
-      const fullRequest = isRelative
-        ? normalizePathSep(path.join(context, request))
-        : request
-
-      // Check if it's opt out bundling package first
-      if (optOutBundlingPackagesSet.has(fullRequest)) {
-        return fullRequest
-      }
-      return resolveNextExternal(fullRequest)
-    }
-
     // TODO-APP: Let's avoid this resolve call as much as possible, and eventually get rid of it.
     if (request.includes('esm-package')) {
       console.log(
@@ -348,6 +343,23 @@ export function makeExternalHandler({
     ) {
       return
     }
+
+    // Early return if the request needs to be bundled, such as in the client layer.
+    // Treat react packages and next internals as external for SSR layer,
+    // also map react to builtin ones with require-hook.
+    // Otherwise keep continue the process to resolve the externals.
+    // if (layer === WEBPACK_LAYERS.serverSideRendering) {
+    //   const isRelative = request.startsWith('.')
+    //   const fullRequest = isRelative
+    //     ? normalizePathSep(path.join(context, request))
+    //     : request
+
+    //   // Check if it's opt out bundling package first
+    //   if (optOutBundlingPackagesSet.has(fullRequest)) {
+    //     return fullRequest
+    //   }
+    //   return resolveNextExternal(res)
+    // }
 
     // If a package should be transpiled by Next.js, we skip making it external.
     // It doesn't matter what the extension is, as we'll transpile it anyway.
