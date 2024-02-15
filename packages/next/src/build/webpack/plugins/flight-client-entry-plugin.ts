@@ -395,7 +395,7 @@ export class FlightClientEntryPlugin {
       )
     }
 
-    compilation.hooks.finishModules.tapPromise(PLUGIN_NAME, () => {
+    {
       const addedClientActionEntryList: Promise<any>[] = []
       const actionMapsPerClientEntry: Record<string, Map<string, string[]>> = {}
 
@@ -460,8 +460,8 @@ export class FlightClientEntryPlugin {
         }
       }
 
-      return Promise.all(addedClientActionEntryList)
-    })
+      await Promise.all(addedClientActionEntryList)
+    }
 
     // Invalidate in development to trigger recompilation
     const invalidator = getInvalidator(compiler.outputPath)
