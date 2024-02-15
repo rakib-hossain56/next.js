@@ -69,13 +69,12 @@ export async function resolveExternal(
   let isEsm: boolean = false
 
   const preferEsmOptions =
-    esmExternals &&
-    isEsmRequested &&
-    // For package that marked as externals that should be not bundled,
-    // we don't resolve them as ESM since it could be resolved as async module,
-    // such as `import(external package)` in the bundle, valued as a `Promise`.
-    !optOutBundlingPackages.some((optOut) => request.startsWith(optOut))
-      ? [true, false]
+    esmExternals && isEsmRequested // &&
+      ? // For package that marked as externals that should be not bundled,
+        // we don't resolve them as ESM since it could be resolved as async module,
+        // such as `import(external package)` in the bundle, valued as a `Promise`.
+        // !optOutBundlingPackages.some((optOut) => request.startsWith(optOut))
+        [true, false]
       : [false]
 
   for (const preferEsm of preferEsmOptions) {
@@ -134,6 +133,9 @@ export async function resolveExternal(
       }
     }
     break
+  }
+  if (request.includes('dual-pkg-optout')) {
+    console.log('res', res, 'isEsm', isEsm)
   }
   return { res, isEsm }
 }
@@ -283,6 +285,15 @@ export function makeExternalHandler({
     }
 
     // TODO-APP: Let's avoid this resolve call as much as possible, and eventually get rid of it.
+    if (request.includes('esm-package')) {
+      console.log(
+        'isLocal',
+        isLocal,
+        request,
+        optOutBundlingPackages.includes(request)
+      )
+    }
+
     const resolveResult = await resolveExternal(
       dir,
       config.experimental.esmExternals,
