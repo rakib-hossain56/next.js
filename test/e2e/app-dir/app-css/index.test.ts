@@ -292,7 +292,7 @@ createNextDescribe(
           expect(
             [
               ...html.matchAll(
-                /<link rel="stylesheet" href="[^<]+\.css(\?v=\d+)?"/g
+                /<link rel="stylesheet" href=".+?\.css(\?v=\d+)?"/g
               ),
             ].length
           ).toBe(3)
